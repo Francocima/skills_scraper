@@ -7,13 +7,32 @@ WORKDIR /app
 
 # Install system dependencies needed for Playwright
 # We need these for the browser automation to work properly
-RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
-    && rm -rf /var/lib/apt/lists/*
 
 # Copy your requirements file
 COPY requirements.txt .
+
+# Install system dependencies required for Playwright and Chromium
+RUN apt-get update && apt-get install -y \
+    wget \
+    gnupg \
+    curl \
+    libnss3 \
+    libgdk-pixbuf2.0-0 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libxcomposite1 \
+    libxrandr2 \
+    libgbm1 \
+    libasound2 \
+    libnspr4 \
+    libxss1 \
+    libxtst6 \
+    fonts-liberation \
+    libappindicator3-1 \
+    libu2f-udev \
+    libozone1 \
+    xdg-utils && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
