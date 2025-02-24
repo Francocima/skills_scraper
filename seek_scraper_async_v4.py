@@ -17,7 +17,7 @@ class SeekScraper:
     #Both enter and exits functions will open the browser and context, and after using it, they will close it.  
     async def __aenter__(self): #The enter function will help use the with statement
         self.playwright = await async_playwright().start() #Starts a playwright session.
-        self.browser = await self.playwright.chromium.launch(headless=False) #Launches google chrome. Headless = FALSE means that the browser will be visible.
+        self.browser = await self.playwright.chromium.launch(headless=True) #Launches google chrome. Headless = FALSE means that the browser will be visible.
         self.context = await self.browser.new_context() #Sets a new context for the browser
         self.page = await self.context.new_page() #Opens a new page in google chrome.
         return self  
