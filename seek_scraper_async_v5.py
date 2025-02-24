@@ -70,51 +70,53 @@ class SeekScraper:
             
             await self.scroll_page(page) #It scrolls the page in look for the elementes (selectors)
 
-            # Selectors taken from the HTML code.
-            title_selector = '[data-automation="job-detail-title"], .j1ww7nx7'
-            company_selector = '[data-automation="advertiser-name"], .y735df0'
-            description_selector = '[data-automation="jobAdDetails"], .YCeva_0'
-            posting_time_selector = '[data-automation="jobDetailsPage"] span:has-text("Posted")'           
-
             job_details = {
                 'url': job_url,  # Adding URL to job details. This adds the job URL to the json outcome
                 'job_id': self.extract_job_id(job_url) #This will extract the job ID from the URL. It uses the extract_job_id function to do so.
             }
+
+            # Selectors taken from the HTML code.
+            #title_selector = '[data-automation="job-detail-title"], .j1ww7nx7'
+            #company_selector = '[data-automation="advertiser-name"], .y735df0'
+            #description_selector = '[data-automation="jobAdDetails"], .YCeva_0'
+            #posting_time_selector = '[data-automation="jobDetailsPage"] span:has-text("Posted")'           
+
+            
             
             #Extract job title
-            try: #Uses the try sentence to extract the job title
-                await page.wait_for_selector(title_selector, timeout=20000) #It uses the function page.wait to mention the selector it must look for and the time it must wait for it to appear.
-                job_details['title'] = page.locator(title_selector).inner_text() #Uses the page.locator to locate the title_selector (CCS code) and then uses the inner_text() function to extract the text.
-            
-            except Exception as e: 
-            
+            try:
+                title_selector = '[data-automation="job-detail-title"], .j1ww7nx7'
+                await page.wait_for_selector(title_selector, timeout=20000)
+                title_element = page.locator(title_selector)
+                job_details['title'] = await title_element.inner_text()
+            except Exception as e:
                 job_details['title'] = "Title not found"
 
             #Extract company name. Same as title_selector
             try:
+                company_selector = '[data-automation="advertiser-name"], .y735df0'
                 await page.wait_for_selector(company_selector, timeout=20000)
-                job_details['company'] = await page.locator(company_selector).inner_text()
-            
+                company_element = page.locator(company_selector)
+                job_details['company'] = await company_element.inner_text()
             except Exception as e:
-            
                 job_details['company'] = "Company not found"
 
             #Extract job requirements. Same as title_selector
             try:
+                description_selector = '[data-automation="jobAdDetails"], .YCeva_0'
                 await page.wait_for_selector(description_selector, timeout=20000)
-                job_details['requirements'] = await page.locator(description_selector).inner_text()
-            
+                description_element = page.locator(description_selector)
+                job_details['requirements'] = await description_element.inner_text()
             except Exception as e:
-            
                 job_details['requirements'] = "Requirements not found"
 
             #Trying to extract the element of the HTML code with the word "Posted" in it. This will give the posting time of the job.
             
             try:
+                posting_time_selector = '[data-automation="jobDetailsPage"] span:has-text("Posted")'
                 await page.wait_for_selector(posting_time_selector, timeout=20000)
                 posting_elements = await page.locator(posting_time_selector).all()
-            
-            # Loop through all elements that contain "Posted" and get the first valid one
+                
                 posting_time = "Posting time not found"
                 for element in posting_elements:
                     text = await element.inner_text()
@@ -132,7 +134,7 @@ class SeekScraper:
             return job_details #This returns all the fields of the job_details dictionary.
 
         except Exception as e:
-            
+            print(f"Error extracting job details: {str(e)}")
             return None
 
 
@@ -307,18 +309,31 @@ class SeekScraper:
 
     async def save_to_json(self, jobs_data: List[Dict], filename: str = 'seek_jobs_v3.json'):
         """Save scraped data to JSON file."""
+    # Ensure all job details are fully resolved
+        scraped_jobs = [] #creates an empty list for scraped jobs
+        for job in jobs_data:
+        # Create a new dict with resolved values
+            scraped_job = {}
+            for key, value in job.items():
+                if key == 'title' or key == 'company' or key == 'requirements' or key == 'posting_time':
+                # Ensure these values are strings, not coroutines
+                    scraped_job[key] = str(value)
+            else:
+                scraped_job[key] = value
+            scraped_jobs.append(scraped_job)
+
         with open(filename, 'w', encoding='utf-8') as f:
-            json.dump(jobs_data, f, ensure_ascii=False, indent=2)
-        print(f"\nSaved {len(jobs_data)} jobs to {filename}")
+            json.dump(scraped_jobs, f, ensure_ascii=False, indent=2)
+        print(f"\nSaved {len(scraped_jobs)} jobs to {filename}")
 
 async def main():
-    search_url = "https://www.seek.com.au/data-analyst-jobs/in-Brisbane-QLD-4000?page=1&sortmode=ListedDate"
+    search_url = "https://www.seek.com.au/data-analyst-jobs/in-Townsville-QLD-4810?sortmode=ListedDate"
 
     start_time = time.time()
     
     async with SeekScraper() as scraper:
       
-        jobs_data = await scraper.scrape_jobs(search_url, posted_time_limit="1d ago", max_pages=20)
+        jobs_data = await scraper.scrape_jobs(search_url, posted_time_limit="1d ago", max_pages=2)
         if jobs_data:
             await scraper.save_to_json(jobs_data)
             print(f"\nScraped {len(jobs_data)} jobs successfully!")
