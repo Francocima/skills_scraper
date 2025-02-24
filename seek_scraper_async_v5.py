@@ -222,7 +222,7 @@ class SeekScraper:
         """Scrape multiple job listings across multiple pages."""
         try:
             print(f"Starting scrape with search URL: {search_url}")
-            await self.page.goto(search_url) #It opens the search_url of the job card
+            await self.page.goto(search_url, timeout=60000) #It opens the search_url of the job card
             await self.page.wait_for_load_state('domcontentloaded') #could be replaced by 'domcontentloaded' if it is faster
             
 
@@ -294,7 +294,7 @@ class SeekScraper:
 
                 # Navigate to next page
                 
-                await self.page.goto(next_page_url)
+                await self.page.goto(next_page_url, timeout=60000)
                 await self.page.wait_for_load_state('domcontentloaded')
                 await asyncio.sleep(3)  # Wait for page to stabilize
                 current_page += 1
@@ -307,7 +307,7 @@ class SeekScraper:
     
 
 
-    async def save_to_json(self, jobs_data: List[Dict], filename: str = 'seek_jobs_v3.json'):
+    ##async def save_to_json(self, jobs_data: List[Dict], filename: str = 'seek_jobs_v3.json'):
         """Save scraped data to JSON file."""
     # Ensure all job details are fully resolved
         scraped_jobs = [] #creates an empty list for scraped jobs
