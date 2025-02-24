@@ -1,6 +1,5 @@
+# Use Python base image
 FROM python:3.9-slim
-
-WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -26,18 +25,30 @@ RUN apt-get update && apt-get install -y \
     libpango-1.0-0 \
     libcairo2 \
     libasound2 \
-    && rm -rf /var/lib/apt/lists/*
+    fonts-liberation \
+    libappindicator3-1 \
+    xdg-utils \
+    git
 
-# Copy requirements and install Python dependencies
+# Set working directory
+WORKDIR /app
+
+# Copy requirements file
 COPY requirements.txt .
+
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Playwright with dependencies
-ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
-RUN playwright install --with-deps chromium
+# Install Playwright browsers
+RUN playwright install chromium
+RUN playwright install-deps
 
-# Copy application code
+# Copy your application code
 COPY . .
 
-# Command to run the API
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Set environment variables
+ENV PLAYWRIGHT_BROWSERS_PATH=/usr/lib/playwright
+ENV NODE_VERSION=16
+
+# Command to run your application
+CMD ["python", "your_app.py"]
