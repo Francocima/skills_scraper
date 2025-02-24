@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional
-from seek_scraper_async_v4 import SeekScraper
+from seek_scraper_async_v5 import SeekScraper
 
 # Create FastAPI instance
 app = FastAPI(title="Seek Scraper API",
