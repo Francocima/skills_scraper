@@ -25,7 +25,7 @@ async def scrape_jobs(request: ScraperRequest):
                 max_pages=request.max_pages,
                 num_jobs=request.num_jobs
             )
-            return {"status": "success", "data": jobs_data}
+            return {"status": "success", "data": all_jobs_data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
