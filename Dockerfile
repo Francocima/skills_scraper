@@ -1,11 +1,10 @@
-# Use Python base image
-FROM python:3.9-slim
+# Use the official Playwright Docker image
+FROM mcr.microsoft.com/playwright/python:v1.40.0-jammy
 
-# Install system dependencies
+WORKDIR /app
+
+# Install system dependencies for Playwright
 RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
-    libglib2.0-0 \
     libnss3 \
     libnspr4 \
     libatk1.0-0 \
@@ -13,42 +12,39 @@ RUN apt-get update && apt-get install -y \
     libcups2 \
     libdrm2 \
     libdbus-1-3 \
-    libxcb1 \
     libxkbcommon0 \
-    libx11-6 \
+    libatspi2.0-0 \
     libxcomposite1 \
     libxdamage1 \
-    libxext6 \
     libxfixes3 \
     libxrandr2 \
     libgbm1 \
-    libpango-1.0-0 \
-    libcairo2 \
     libasound2 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libxcursor1 \
+    libxi6 \
+    libxtst6 \
     fonts-liberation \
-    libappindicator3-1 \
-    xdg-utils \
-    git
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
-WORKDIR /app
-
-# Copy requirements file
+# Copy and install Python requirements
 COPY requirements.txt .
-
-# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Install Playwright browsers
 RUN playwright install chromium
-RUN playwright install-deps
+RUN playwright install-deps chromium
 
-# Copy your application code
+# Copy application files
 COPY . .
 
-# Set environment variables
-ENV PLAYWRIGHT_BROWSERS_PATH=/usr/lib/playwright
-ENV NODE_VERSION=16
+# Set up display environment for Playwright
+ENV DISPLAY=:99
 
-# Command to run your application
-CMD ["python", "your_app.py"]
+# Expose port for the API
+EXPOSE 8000
+
+# Command to run the app
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
