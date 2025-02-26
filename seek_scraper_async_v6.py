@@ -12,26 +12,46 @@ import asyncio
 class SeekScraper:
     #First initializes the class with the playwright and the browser
     def __init__(self): #When defining a class, self ensures that each instance of the class can store and access its own attributes and call its own methods.
+        
         self.base_url = "https://www.seek.com.au" #Sets the base URL for the scraper
         self.timeout = 15000
 
     #Both enter and exits functions will open the browser and context, and after using it, they will close it.  
     async def __aenter__(self): #The enter function will help use the with statement
-        self.playwright = await async_playwright().start() #Starts a playwright session.
-        self.browser = await self.playwright.chromium.launch(headless=True,
-                                                             args=['--disable-dev-shm-usage',
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-gpu',
-                '--disable-software-rasterizer',]) #Launches google chrome. Headless = FALSE means that the browser will be visible.
-        self.context = await self.browser.new_context(
-            viewport={'width': 1920, 'height': 1080},
-            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-            ) #Sets a new context for the browser
-        self.page = await self.context.new_page() #Opens a new page in google chrome.
+        try:
+            self.playwright = await async_playwright().start() #Starts a playwright session.
+            self.browser = await self.playwright.chromium.launch(
+                    headless=True,
+                    args=['--disable-dev-shm-usage',
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-gpu',
+                    '--disable-software-rasterizer',
+                    '--disable-extensions',
+                    '--disable-background-networking',
+                    '--disable-features=TranslateUI,BlinkGenPropertyTrees',
+                    '--disable-default-apps',
+                    '--disable-sync'
+                    ]) #Launches google chrome. Headless = FALSE means that the browser will be visible.
+            
+            self.context = await self.browser.new_context(
+                viewport={'width': 1280, 'height': 720},
+                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                ) #Sets a new context for the browser
+            self.page = await self.context.new_page() #Opens a new page in google chrome.
+            
+            return self 
         
-        return self  
-        
+        except Exception as e:
+            print(f"Error in __aenter__: {str(e)}")
+
+            if hasattr(self, 'context') and self.context:
+                await self.context.close()
+            if hasattr(self, 'browser') and self.browser:
+                await self.browser.close()
+            if hasattr(self, 'playwright') and self.playwright:
+                await self.playwright.stop()
+            raise   
     
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.context.close()
@@ -365,3 +385,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
