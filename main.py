@@ -31,12 +31,12 @@ async def scrape_jobs(request: ScraperRequest):
 
 
 # Add a test endpoint
-@app.get("/Health-Test")
+@app.get("/health-test")
 async def root():
     return {"message": "Seek Scraper API is running. Health check OK."}
 
 # Add a POST test endpoint
-@app.post("/Post-Test")
+@app.post("/post-test")
 async def root(request: ScraperRequest):
   body = await request.json()
     print(body)  # Debugging
