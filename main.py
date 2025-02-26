@@ -27,7 +27,7 @@ async def scrape_jobs(request: ScraperRequest):
             )
             return {"status": "success", "data": jobs_data}
     except Exception as e:
-        raise HTTPException(status_code=600, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # Add a test endpoint
@@ -38,8 +38,7 @@ async def root():
 # Add a POST test endpoint
 @app.post("/post-test")
 async def root(request: ScraperRequest):
-  body = await request.json()
-  print(body)  # Debugging
-  return {"message": "Data received", "data": body}
+  return {"message": "Data received", "data": request.dict()}
+
 
     
