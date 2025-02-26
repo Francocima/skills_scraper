@@ -14,7 +14,9 @@ class SeekScraper:
     def __init__(self): #When defining a class, self ensures that each instance of the class can store and access its own attributes and call its own methods.
         
         self.base_url = "https://www.seek.com.au" #Sets the base URL for the scraper
-        
+        self.timeout = 30000 #Sets the timeout for the scraper to 30 seconds. This is the time it will wait for the page to load.
+        self.max_concurrent_pages = 2
+        self.page_load_timeout = 30000
 
     #Both enter and exits functions will open the browser and context, and after using it, they will close it.  
     async def __aenter__(self): #The enter function will help use the with statement
@@ -31,8 +33,16 @@ class SeekScraper:
                     '--disable-background-networking',
                     '--disable-features=TranslateUI,BlinkGenPropertyTrees',
                     '--disable-default-apps',
-                    '--disable-sync'
-                    ]) #Launches google chrome. Headless = FALSE means that the browser will be visible.
+                    '--disable-sync',
+                    '--single-process',  # Run browser in single process mode
+                    '--deterministic-fetch',  # Make network fetches more reliable
+                    '--disable-features=TimerThrottling,BackForwardCache',
+                    '--disable-dev-tools',
+                    # Memory optimization
+                    '--js-flags="--max-old-space-size=512"'
+                    ],
+            chromium_sandbow=Flase,
+            timeout=60000)
             
             self.context = await self.browser.new_context(
                 viewport={'width': 1280, 'height': 720},
