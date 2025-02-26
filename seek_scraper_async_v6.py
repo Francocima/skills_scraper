@@ -14,7 +14,7 @@ class SeekScraper:
     def __init__(self): #When defining a class, self ensures that each instance of the class can store and access its own attributes and call its own methods.
         
         self.base_url = "https://www.seek.com.au" #Sets the base URL for the scraper
-        self.timeout = 15000
+        
 
     #Both enter and exits functions will open the browser and context, and after using it, they will close it.  
     async def __aenter__(self): #The enter function will help use the with statement
