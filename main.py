@@ -29,7 +29,17 @@ async def scrape_jobs(request: ScraperRequest):
     except Exception as e:
         raise HTTPException(status_code=600, detail=str(e))
 
+
 # Add a test endpoint
-@app.get("/")
+@app.get("/Health-Test")
 async def root():
     return {"message": "Seek Scraper API is running. Health check OK."}
+
+# Add a POST test endpoint
+@app.post("/Post-Test")
+async def root(request: ScraperRequest):
+  body = await request.json()
+    print(body)  # Debugging
+    return {"message": "Data received", "data": body}
+
+    
