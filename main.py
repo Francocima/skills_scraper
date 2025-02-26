@@ -39,7 +39,7 @@ async def root():
 @app.post("/post-test")
 async def root(request: ScraperRequest):
   body = await request.json()
-    print(body)  # Debugging
-    return {"message": "Data received", "data": body}
+  print(body)  # Debugging
+  return {"message": "Data received", "data": body}
 
     
